@@ -20,11 +20,15 @@ import 'package:news/core/widgets/custom_text_field.dart';
 import 'package:news/core/widgets/middle_news_item.dart';
 import 'package:news/core/widgets/news_item.dart';
 import 'package:news/core/widgets/top_news_item.dart';
+import 'package:news/feature_news/data/data_source/local/local_data_provider_news.dart';
 import 'package:news/feature_news/data/data_source/remote/api_provider_news.dart';
+import 'package:news/feature_news/data/repositories/local_storage_repositoryimpl.dart';
 import 'package:news/feature_news/data/repositories/news_repositoryimpl.dart';
 import 'package:news/feature_news/domain/usecases/get_top_headline_news_by_category_usecase.dart';
 import 'package:news/feature_news/domain/usecases/get_top_headline_news_by_source_usecase.dart';
 import 'package:news/feature_news/domain/usecases/get_top_headline_news_usecase.dart';
+import 'package:news/feature_news/domain/usecases/is_article_saved_usecase.dart';
+import 'package:news/feature_news/domain/usecases/save_article_usecase.dart';
 import 'package:news/feature_news/presentation/bloc/get_all_news_status.dart';
 import 'package:news/feature_news/presentation/bloc/get_top_headline_news.dart';
 import 'package:news/feature_news/presentation/bloc/get_top_headline_news_by_category_status.dart';
@@ -63,7 +67,9 @@ class _HomeScreenState extends State<HomeScreen> {
         GetTopHeadlineNewsByCategoryUseCase(
             NewsRepositoryImpl(ApiProviderNews())),
         GetTopHeadlineNewsUseCase(NewsRepositoryImpl(ApiProviderNews())),
-        GetTopHeadlineNewsBySourceUseCase(NewsRepositoryImpl(ApiProviderNews())));
+        GetTopHeadlineNewsBySourceUseCase(NewsRepositoryImpl(ApiProviderNews())),
+        SaveArticleUseCase(LocalStorageNewsRepositoryImpl(LocalDataProviderNews())),
+        IsArticleSavedUseCase(LocalStorageNewsRepositoryImpl(LocalDataProviderNews())));
 
     newsMetas.addAll([
       NewsMeta(name: 'Business', id: 'business', metaType: MetaType.CATEGORY),

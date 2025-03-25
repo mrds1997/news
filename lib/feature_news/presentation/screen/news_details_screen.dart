@@ -30,10 +30,16 @@ import 'package:news/feature_news/presentation/bloc/get_all_news_status.dart';
 import 'package:news/feature_news/presentation/bloc/get_top_headline_news.dart';
 import 'package:news/feature_news/presentation/bloc/get_top_headline_news_by_category_status.dart';
 import 'package:news/feature_news/presentation/bloc/get_top_headline_news_by_source_status.dart';
+import 'package:news/feature_news/presentation/bloc/is_article_saved_status.dart';
 import 'package:news/feature_news/presentation/bloc/news_bloc.dart';
+import 'package:news/feature_news/presentation/bloc/save_article_status.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../data/data_source/local/local_data_provider_news.dart';
+import '../../data/repositories/local_storage_repositoryimpl.dart';
 import '../../domain/usecases/get_news_usecase.dart';
+import '../../domain/usecases/is_article_saved_usecase.dart';
+import '../../domain/usecases/save_article_usecase.dart';
 
 class NewsDetailsScreen extends StatefulWidget {
   final Article article;
@@ -47,19 +53,21 @@ class NewsDetailsScreen extends StatefulWidget {
 class _NewsDetailsScreenState extends State<NewsDetailsScreen> {
   late NewsBloc _newsBloc;
   bool _isExpanded = false;
+  bool _isSaved = false;
 
   @override
   void initState() {
     super.initState();
-    _newsBloc = NewsBloc(
-        GetNewsUseCase(NewsRepositoryImpl(ApiProviderNews())),
+    _newsBloc = NewsBloc(GetNewsUseCase(NewsRepositoryImpl(ApiProviderNews())),
         GetTopHeadlineNewsByCategoryUseCase(
             NewsRepositoryImpl(ApiProviderNews())),
         GetTopHeadlineNewsUseCase(NewsRepositoryImpl(ApiProviderNews())),
-        GetTopHeadlineNewsBySourceUseCase(
-            NewsRepositoryImpl(ApiProviderNews())));
+        GetTopHeadlineNewsBySourceUseCase(NewsRepositoryImpl(ApiProviderNews())),
+        SaveArticleUseCase(LocalStorageNewsRepositoryImpl(LocalDataProviderNews())),
+        IsArticleSavedUseCase(LocalStorageNewsRepositoryImpl(LocalDataProviderNews())));
 
     //_newsBloc.add(GetTopHeadLineNewsByCategoryEvent(param));
+    _newsBloc.add(IsArticleSavedEvent(widget.article.articleId));
   }
 
   @override
@@ -67,19 +75,12 @@ class _NewsDetailsScreenState extends State<NewsDetailsScreen> {
     return Scaffold(
       backgroundColor: Colors.white38,
       resizeToAvoidBottomInset: false,
-      body: SafeArea(child: NewsDetailsUi()
-          /*BlocProvider(
+      body: SafeArea(child: BlocProvider(
         create: (_) => _newsBloc,
         child: BlocConsumer<NewsBloc, NewsState>(
           listener: (context, state) {
-            */ /*if (state.getAllNewsStatus is GetAllNewsSuccess) {
-              EasyLoading.dismiss();
-            }
-            if (state.getAllNewsStatus is GetAllNewsLoading) {
-                EasyLoading.show(status: "Please Wait!");
-            }*/ /*
-            if (state.getTopHeadlineNewsByCategoryStatus is GetTopHeadlineNewsByCategoryError) {
-              GetTopHeadlineNewsByCategoryError data = state.getTopHeadlineNewsByCategoryStatus as GetTopHeadlineNewsByCategoryError;
+            if (state.saveArticleStatus is SaveArticleError) {
+              SaveArticleError data = state.saveArticleStatus as SaveArticleError;
               if (data.error != null) {
                 ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text(data.error!)));
@@ -87,27 +88,19 @@ class _NewsDetailsScreenState extends State<NewsDetailsScreen> {
             }
           },
           builder: (context, state) {
-            if (state.getTopHeadlineNewsByCategoryStatus is GetTopHeadlineNewsByCategoryLoading) {
-              return const Center(child: CircularProgressIndicator());
+            if (state.saveArticleStatus is SaveArticleSuccess) {
+              _isSaved = !_isSaved;
+              return NewsDetailsUi();
             }
-            if (state.getTopHeadlineNewsByCategoryStatus is GetTopHeadlineNewsByCategorySuccess) {
-              var data = state.getTopHeadlineNewsByCategoryStatus as GetTopHeadlineNewsByCategorySuccess;
-              return NewsUi(data.newsEntity.articles);
+            if (state.isArticleSavedStatus is IsArticleSavedSuccess) {
+              var data = state.isArticleSavedStatus as IsArticleSavedSuccess;
+              _isSaved = data.isSaved;
+              return NewsDetailsUi();
             }
-            if (state.getTopHeadlineNewsBySourceStatus is GetTopHeadlineNewsBySourceLoading) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            if (state.getTopHeadlineNewsBySourceStatus is GetTopHeadlineNewsBySourceSuccess) {
-              var data = state.getTopHeadlineNewsBySourceStatus as GetTopHeadlineNewsBySourceSuccess;
-              return NewsUi(data.newsEntity.articles);
-            }
-            return Padding(
-              padding: EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-              child: SizedBox(),
-            );
+            return const SizedBox();
           },
         ),
-      )*/
+      )
           ),
     );
   }
@@ -246,7 +239,25 @@ class _NewsDetailsScreenState extends State<NewsDetailsScreen> {
               ],
             ),
           ),
-        )
+        ),
+        Positioned(
+            top: 16.h,
+            right: 16.w,
+            child: GestureDetector(
+              onTap: (){
+                _newsBloc.add(SaveArticleEvent(widget.article));
+              },
+              child: Container(
+                height: 42.h,
+                width: 42.w,
+                padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 10.w),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10.r),
+                  color: Color(0xFF08022B)
+                ),
+                child: _isSaved ? SvgPicture.asset('assets/images/ic_remove_fav.svg', color: Colors.white,) : SvgPicture.asset('assets/images/ic_add_fav.svg', color: Colors.white,),
+                      ),
+            ))
       ],
     );
   }

@@ -1,18 +1,18 @@
 
 import 'package:news/core/models/news_entity.dart';
 
-abstract class GetAllNewsStatus {}
+abstract class SaveArticleStatus {}
 
-class GetAllNewsSuccess extends GetAllNewsStatus {
-  NewsEntity newsEntity;
-  GetAllNewsSuccess(this.newsEntity);
+class SaveArticleSuccess extends SaveArticleStatus {
+  int id;
+  SaveArticleSuccess(this.id);
 }
 
-class GetAllNewsNoAction extends GetAllNewsStatus{}
+class SaveArticleNoAction extends SaveArticleStatus{}
 
-class GetAllNewsLoading extends GetAllNewsStatus {}
+class SaveArticleLoading extends SaveArticleStatus {}
 
-class GetAllNewsError extends GetAllNewsStatus {
+class SaveArticleError extends SaveArticleStatus {
   String? error;
-  GetAllNewsError(this.error);
+  SaveArticleError(this.error);
 }

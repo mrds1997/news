@@ -9,11 +9,11 @@ import '../../../core/resources/data_state.dart';
 import '../../../core/use_cases/use_case.dart';
 
 
-class SaveNewsUseCase extends UseCase<DataState<int>, Article>{
+class SaveArticleUseCase extends UseCase<DataState<int>, Article>{
 
   LocalStorageNewsRepository repository;
 
-  SaveNewsUseCase(this.repository);
+  SaveArticleUseCase(this.repository);
 
   @override
   Future<DataState<int>> call(Article param) async {

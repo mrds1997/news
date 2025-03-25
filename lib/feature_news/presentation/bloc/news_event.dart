@@ -23,4 +23,12 @@ class GetTopHeadLineNewsEvent extends NewsEvent {
   NewsParam param;
   GetTopHeadLineNewsEvent(this.param);
 }
+class SaveArticleEvent extends NewsEvent {
+  Article param;
+  SaveArticleEvent(this.param);
+}
+class IsArticleSavedEvent extends NewsEvent {
+  String param;
+  IsArticleSavedEvent(this.param);
+}
 
