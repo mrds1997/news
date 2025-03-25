@@ -20,6 +20,7 @@ class CustomTextField extends StatelessWidget {
   final int? maxLine;
   final Function? onSuffixIconClicked;
   final TextInputAction textInputAction;
+  final Function? onClicked;
 
   CustomTextField(
       {required this.hintText,
@@ -35,7 +36,8 @@ class CustomTextField extends StatelessWidget {
       this.isForDescription = false,
       this.maxLine,
       this.onSuffixIconClicked,
-      this.textInputAction = TextInputAction.none});
+      this.textInputAction = TextInputAction.none,
+      this.onClicked});
 
   @override
   Widget build(BuildContext context) {
@@ -58,11 +60,16 @@ class CustomTextField extends StatelessWidget {
           keyboardType: textInputType,
           inputFormatters: inputFormatters,
           validator: validator,
-          style: const TextStyle(color: Colors.white),
+          style: TextStyle(color: Theme.of(context).hintColor),
           enabled: isEnabled,
           minLines: isForDescription ? 3 : null,
           maxLines: maxLine ?? 1,
           maxLength: maxLength,
+          onTap: (){
+            if(onClicked != null){
+              onClicked!();
+            }
+          },
           textInputAction: textInputAction,
           onChanged: onChangedValue != null
               ? (value) {
@@ -73,6 +80,7 @@ class CustomTextField extends StatelessWidget {
               filled: true,
               fillColor: Colors.white,
               hintText: hintText,
+
               hintStyle: TextStyle(color: Theme.of(context).hintColor),
               prefixIcon: Padding(
                 padding: EdgeInsets.symmetric(

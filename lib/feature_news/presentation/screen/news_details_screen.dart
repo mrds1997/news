@@ -23,6 +23,7 @@ import 'package:news/core/widgets/news_item.dart';
 import 'package:news/core/widgets/top_news_item.dart';
 import 'package:news/feature_news/data/data_source/remote/api_provider_news.dart';
 import 'package:news/feature_news/data/repositories/news_repositoryimpl.dart';
+import 'package:news/feature_news/domain/usecases/get_cache_articles_usecase.dart';
 import 'package:news/feature_news/domain/usecases/get_top_headline_news_by_category_usecase.dart';
 import 'package:news/feature_news/domain/usecases/get_top_headline_news_by_source_usecase.dart';
 import 'package:news/feature_news/domain/usecases/get_top_headline_news_usecase.dart';
@@ -64,7 +65,8 @@ class _NewsDetailsScreenState extends State<NewsDetailsScreen> {
         GetTopHeadlineNewsUseCase(NewsRepositoryImpl(ApiProviderNews())),
         GetTopHeadlineNewsBySourceUseCase(NewsRepositoryImpl(ApiProviderNews())),
         SaveArticleUseCase(LocalStorageNewsRepositoryImpl(LocalDataProviderNews())),
-        IsArticleSavedUseCase(LocalStorageNewsRepositoryImpl(LocalDataProviderNews())));
+        IsArticleSavedUseCase(LocalStorageNewsRepositoryImpl(LocalDataProviderNews())),
+        GetCacheArticlesUseCase(LocalStorageNewsRepositoryImpl(LocalDataProviderNews())));
 
     //_newsBloc.add(GetTopHeadLineNewsByCategoryEvent(param));
     _newsBloc.add(IsArticleSavedEvent(widget.article.articleId));
@@ -257,6 +259,42 @@ class _NewsDetailsScreenState extends State<NewsDetailsScreen> {
                 ),
                 child: _isSaved ? SvgPicture.asset('assets/images/ic_remove_fav.svg', color: Colors.white,) : SvgPicture.asset('assets/images/ic_add_fav.svg', color: Colors.white,),
                       ),
+            )),
+        Positioned(
+            top: 16.h,
+            right: 16.w,
+            child: GestureDetector(
+              onTap: (){
+                _newsBloc.add(SaveArticleEvent(widget.article));
+              },
+              child: Container(
+                height: 42.h,
+                width: 42.w,
+                padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 10.w),
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10.r),
+                    color: Color(0xFF08022B)
+                ),
+                child: _isSaved ? SvgPicture.asset('assets/images/ic_remove_fav.svg', color: Colors.white,) : SvgPicture.asset('assets/images/ic_add_fav.svg', color: Colors.white,),
+              ),
+            )),
+        Positioned(
+            top: 16.h,
+            left: 16.w,
+            child: GestureDetector(
+              onTap: (){
+                Navigator.of(context).pop();
+              },
+              child: Container(
+                height: 42.h,
+                width: 42.w,
+                padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 10.w),
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10.r),
+                    color: Color(0xFF08022B)
+                ),
+                child: SvgPicture.asset('assets/images/ic_arrow_left.svg', color: Colors.white,),
+              ),
             ))
       ],
     );

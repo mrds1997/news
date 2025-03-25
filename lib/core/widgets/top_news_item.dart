@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
 
 class TopNewsItem extends StatelessWidget {
@@ -79,7 +81,20 @@ class TopNewsItem extends StatelessWidget {
 */
               ],
             ),
-          )
+          ),
+          Positioned(
+                  top: 8.h,
+                  right: 8.w,
+                  child: Container(
+                    height: 32.h,
+                    width: 32.w,
+                    padding: EdgeInsets.symmetric(vertical: 5.h, horizontal: 5.w),
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10.r),
+                        color: Color(0xFF08022B)
+                    ),
+                    child: SvgPicture.asset('assets/images/ic_saved.svg', color: Colors.white),
+                  ),)
         ],
       ),
     );

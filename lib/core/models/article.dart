@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:news/core/models/source.dart';
 
 class Article {
@@ -41,11 +43,24 @@ class Article {
       'description': description,
       'content': content,
       'publishAt': publishedAt,
-      'source': source != null ? source?.name : "",
+      'source': source != null ? jsonEncode(source) : null,
       'url': url,
       'author': author,
       'urlToImage': urlToImage,
     };
+  }
+
+  factory Article.fromMap(Map<String, dynamic> map) {
+    return Article(title: map['title'],
+    description: map['description'],
+    content: map['content'],
+    publishedAt: map['publishAt'],
+    source:  map['source'] != null ? Source.fromMap(jsonDecode(map['source'])) : null,
+    url: map['url'],
+    author: map['author'],
+    urlToImage: map['urlToImage']
+
+    );
   }
 
   String get articleId {

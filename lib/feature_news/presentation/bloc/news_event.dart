@@ -31,4 +31,5 @@ class IsArticleSavedEvent extends NewsEvent {
   String param;
   IsArticleSavedEvent(this.param);
 }
+class GetCacheArticlesEvent extends NewsEvent {}
 

@@ -7,6 +7,7 @@ import 'package:news/feature_news/domain/usecases/get_news_usecase.dart';
 import 'package:news/feature_news/domain/usecases/get_top_headline_news_by_category_usecase.dart';
 import 'package:news/feature_news/domain/usecases/get_top_headline_news_usecase.dart';
 import 'package:news/feature_news/presentation/bloc/get_all_news_status.dart';
+import 'package:news/feature_news/presentation/bloc/get_cached_articles_status.dart';
 import 'package:news/feature_news/presentation/bloc/get_top_headline_news.dart';
 import 'package:news/feature_news/presentation/bloc/get_top_headline_news_by_category_status.dart';
 import 'package:news/feature_news/presentation/bloc/get_top_headline_news_by_source_status.dart';
@@ -15,6 +16,7 @@ import 'package:news/feature_news/presentation/bloc/save_article_status.dart';
 import '../../../core/params/write_localstorage_param.dart';
 import '../../../core/resources/data_state.dart';
 import '../../../core/utils/data_store_keys.dart';
+import '../../domain/usecases/get_cache_articles_usecase.dart';
 import '../../domain/usecases/get_top_headline_news_by_source_usecase.dart';
 import '../../domain/usecases/is_article_saved_usecase.dart';
 import '../../domain/usecases/read_localstorage_usecase.dart';
@@ -33,21 +35,23 @@ class NewsBloc extends Bloc<NewsEvent, NewsState> {
   GetTopHeadlineNewsBySourceUseCase getTopHeadlineNewsBySourceUseCase;
   SaveArticleUseCase saveArticleUseCase;
   IsArticleSavedUseCase isArticleSavedUseCase;
+  GetCacheArticlesUseCase getCashedArticlesUseCase;
 
   NewsBloc(this.getNewsUseCase,
       this.getTopHeadlineNewsByCategoryUseCase,
       this.getTopHeadlineNewsUseCase,
       this.getTopHeadlineNewsBySourceUseCase,
       this.saveArticleUseCase,
-      this.isArticleSavedUseCase)
+      this.isArticleSavedUseCase,
+      this.getCashedArticlesUseCase)
       : super(NewsState(
             getAllNewsStatus: GetAllNewsNoAction(),
             getTopHeadlineNewsStatus: GetTopHeadlineNewsNoAction(),
             getTopHeadlineNewsByCategoryStatus: GetTopHeadlineNewsByCategoryNoAction(),
             getTopHeadlineNewsBySourceStatus: GetTopHeadlineNewsBySourceNoAction(),
             saveArticleStatus: SaveArticleNoAction(),
-            isArticleSavedStatus: IsArticleSavedNoAction()
-
+            isArticleSavedStatus: IsArticleSavedNoAction(),
+            getCacheArticlesStatus: GetCachedArticlesNoAction()
   )) {
 
     on<GetAllNewsEvent>((event, emit) async {
@@ -61,6 +65,8 @@ class NewsBloc extends Bloc<NewsEvent, NewsState> {
     });
 
     on<GetTopHeadLineNewsByCategoryEvent>((event, emit) async {
+      emit(state.copyWith(newGetCashedArticlesStatus: GetCachedArticlesNoAction()));
+      emit(state.copyWith(newGetTopHeadlineNewsBySourceStatus: GetTopHeadlineNewsBySourceNoAction()));
       emit(state.copyWith(newGetTopHeadlineNewsByCategoryStatus: GetTopHeadlineNewsByCategoryLoading()));
       DataState dataState = await getTopHeadlineNewsByCategoryUseCase(event.param);
       if (dataState is DataSuccess) {
@@ -68,11 +74,10 @@ class NewsBloc extends Bloc<NewsEvent, NewsState> {
       } else {
         emit(state.copyWith(newGetTopHeadlineNewsByCategoryStatus: GetTopHeadlineNewsByCategoryError(dataState.error)));
       }
-      emit(state.copyWith(newGetTopHeadlineNewsBySourceStatus: GetTopHeadlineNewsBySourceNoAction()));
-
     });
 
     on<GetTopHeadLineNewsBySourceEvent>((event, emit) async {
+      emit(state.copyWith(newGetTopHeadlineNewsByCategoryStatus: GetTopHeadlineNewsByCategoryNoAction()));
       emit(state.copyWith(newGetTopHeadlineNewsBySourceStatus: GetTopHeadlineNewsBySourceLoading()));
       DataState dataState = await getTopHeadlineNewsBySourceUseCase(event.param);
       if (dataState is DataSuccess) {
@@ -80,7 +85,6 @@ class NewsBloc extends Bloc<NewsEvent, NewsState> {
       } else {
         emit(state.copyWith(newGetTopHeadlineNewsBySourceStatus: GetTopHeadlineNewsBySourceError(dataState.error)));
       }
-      emit(state.copyWith(newGetTopHeadlineNewsByCategoryStatus: GetTopHeadlineNewsByCategoryNoAction()));
     });
 
     on<SaveArticleEvent>((event, emit) async {
@@ -103,7 +107,14 @@ class NewsBloc extends Bloc<NewsEvent, NewsState> {
       }
     });
 
-
-
+    on<GetCacheArticlesEvent>((event, emit) async {
+      emit(state.copyWith(newGetCashedArticlesStatus: GetCachedArticlesLoading()));
+      DataState dataState = await getCashedArticlesUseCase();
+      if (dataState is DataSuccess) {
+        emit(state.copyWith(newGetCashedArticlesStatus: GetCachedArticlesSuccess(dataState.data)));
+      } else {
+        emit(state.copyWith(newGetCashedArticlesStatus: GetCachedArticlesError(dataState.error)));
+      }
+    });
   }
 }

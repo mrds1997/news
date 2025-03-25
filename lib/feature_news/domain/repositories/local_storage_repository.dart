@@ -11,4 +11,5 @@ abstract class LocalStorageNewsRepository {
   Future<DataState<String?>> deleteStorageData(String key);
   Future<DataState<int>> saveArticle(Article article);
   Future<DataState<bool>> isArticleSaved(String articleId);
+  Future<DataState<List<Article>>> getCashedArticles();
 }

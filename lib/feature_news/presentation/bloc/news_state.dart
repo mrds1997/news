@@ -7,6 +7,7 @@ class NewsState {
   final GetTopHeadlineNewsBySourceStatus getTopHeadlineNewsBySourceStatus;
   final SaveArticleStatus saveArticleStatus;
   final IsArticleSavedStatus isArticleSavedStatus;
+  final GetCachedArticlesStatus getCacheArticlesStatus;
 
 
   NewsState({
@@ -15,7 +16,8 @@ class NewsState {
     required this.getTopHeadlineNewsStatus,
     required this.getTopHeadlineNewsBySourceStatus,
     required this.saveArticleStatus,
-    required this.isArticleSavedStatus
+    required this.isArticleSavedStatus,
+    required this.getCacheArticlesStatus
   });
 
   NewsState copyWith({
@@ -24,7 +26,8 @@ class NewsState {
     GetTopHeadlineNewsStatus? newGetTopHeadlineNewsStatus,
     GetTopHeadlineNewsBySourceStatus? newGetTopHeadlineNewsBySourceStatus,
     SaveArticleStatus? newSaveArticleStatus,
-    IsArticleSavedStatus? newIsArticleSavedStatus
+    IsArticleSavedStatus? newIsArticleSavedStatus,
+    GetCachedArticlesStatus? newGetCashedArticlesStatus
   }) {
     return NewsState(
       getAllNewsStatus: newGetAllNewsStatus ?? getAllNewsStatus,
@@ -32,7 +35,8 @@ class NewsState {
       getTopHeadlineNewsStatus: newGetTopHeadlineNewsStatus ?? getTopHeadlineNewsStatus,
       getTopHeadlineNewsBySourceStatus: newGetTopHeadlineNewsBySourceStatus ?? getTopHeadlineNewsBySourceStatus,
       saveArticleStatus: newSaveArticleStatus ?? saveArticleStatus,
-      isArticleSavedStatus: newIsArticleSavedStatus ?? isArticleSavedStatus
+      isArticleSavedStatus: newIsArticleSavedStatus ?? isArticleSavedStatus,
+      getCacheArticlesStatus: newGetCashedArticlesStatus ?? getCacheArticlesStatus
     );
   }
 }

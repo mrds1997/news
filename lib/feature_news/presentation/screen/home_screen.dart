@@ -24,17 +24,20 @@ import 'package:news/feature_news/data/data_source/local/local_data_provider_new
 import 'package:news/feature_news/data/data_source/remote/api_provider_news.dart';
 import 'package:news/feature_news/data/repositories/local_storage_repositoryimpl.dart';
 import 'package:news/feature_news/data/repositories/news_repositoryimpl.dart';
+import 'package:news/feature_news/domain/usecases/get_cache_articles_usecase.dart';
 import 'package:news/feature_news/domain/usecases/get_top_headline_news_by_category_usecase.dart';
 import 'package:news/feature_news/domain/usecases/get_top_headline_news_by_source_usecase.dart';
 import 'package:news/feature_news/domain/usecases/get_top_headline_news_usecase.dart';
 import 'package:news/feature_news/domain/usecases/is_article_saved_usecase.dart';
 import 'package:news/feature_news/domain/usecases/save_article_usecase.dart';
 import 'package:news/feature_news/presentation/bloc/get_all_news_status.dart';
+import 'package:news/feature_news/presentation/bloc/get_cached_articles_status.dart';
 import 'package:news/feature_news/presentation/bloc/get_top_headline_news.dart';
 import 'package:news/feature_news/presentation/bloc/get_top_headline_news_by_category_status.dart';
 import 'package:news/feature_news/presentation/bloc/get_top_headline_news_by_source_status.dart';
 import 'package:news/feature_news/presentation/bloc/news_bloc.dart';
 import 'package:news/feature_news/presentation/screen/news_details_screen.dart';
+import 'package:news/feature_news/presentation/screen/search_screen.dart';
 
 import '../../domain/usecases/get_news_usecase.dart';
 
@@ -59,6 +62,10 @@ class _HomeScreenState extends State<HomeScreen> {
   List<NewsMeta> newsMetas = [];
   late List<bool> selectedItem;
 
+  List<Article> cacheArticles = [];
+
+  late bool _isGetRemoteArticles;
+
   @override
   void initState() {
     super.initState();
@@ -69,7 +76,8 @@ class _HomeScreenState extends State<HomeScreen> {
         GetTopHeadlineNewsUseCase(NewsRepositoryImpl(ApiProviderNews())),
         GetTopHeadlineNewsBySourceUseCase(NewsRepositoryImpl(ApiProviderNews())),
         SaveArticleUseCase(LocalStorageNewsRepositoryImpl(LocalDataProviderNews())),
-        IsArticleSavedUseCase(LocalStorageNewsRepositoryImpl(LocalDataProviderNews())));
+        IsArticleSavedUseCase(LocalStorageNewsRepositoryImpl(LocalDataProviderNews())),
+        GetCacheArticlesUseCase(LocalStorageNewsRepositoryImpl(LocalDataProviderNews())));
 
     newsMetas.addAll([
       NewsMeta(name: 'Business', id: 'business', metaType: MetaType.CATEGORY),
@@ -89,13 +97,10 @@ class _HomeScreenState extends State<HomeScreen> {
     selectedItem = List.filled(newsMetas.length, false);
     selectedItem[0] = true;
 
-    NewsParam param = NewsParam();
-    param.language = 'en';
-    param.category = newsMetas[0].id;
-    //param.pageSize = 10;
-    //param.page = 5;
-    //_newsBloc.add(GetTopHeadLineNewsEvent(param));
-    _newsBloc.add(GetTopHeadLineNewsByCategoryEvent(param));
+    _isGetRemoteArticles = true;
+
+    _newsBloc.add(GetCacheArticlesEvent());
+
   }
 
   @override
@@ -107,12 +112,6 @@ class _HomeScreenState extends State<HomeScreen> {
         create: (_) => _newsBloc,
         child: BlocConsumer<NewsBloc, NewsState>(
           listener: (context, state) {
-            /*if (state.getAllNewsStatus is GetAllNewsSuccess) {
-              EasyLoading.dismiss();
-            }
-            if (state.getAllNewsStatus is GetAllNewsLoading) {
-                EasyLoading.show(status: "Please Wait!");
-            }*/
             if (state.getTopHeadlineNewsByCategoryStatus is GetTopHeadlineNewsByCategoryError) {
               GetTopHeadlineNewsByCategoryError data = state.getTopHeadlineNewsByCategoryStatus as GetTopHeadlineNewsByCategoryError;
               if (data.error != null) {
@@ -120,21 +119,38 @@ class _HomeScreenState extends State<HomeScreen> {
                     SnackBar(content: Text(data.error!)));
               }
             }
+            if (state.getCacheArticlesStatus is GetCachedArticlesSuccess) {
+              var data = state.getCacheArticlesStatus as GetCachedArticlesSuccess;
+              cacheArticles.clear();
+              cacheArticles.addAll(data.articles);
+              if(_isGetRemoteArticles){
+                NewsParam param = NewsParam();
+                param.language = 'en';
+                param.category = newsMetas[0].id;
+                //param.pageSize = 10;
+                //param.page = 5;
+                //_newsBloc.add(GetTopHeadLineNewsEvent(param));
+                _newsBloc.add(GetTopHeadLineNewsByCategoryEvent(param));
+              }
+            }
           },
           builder: (context, state) {
             if (state.getTopHeadlineNewsByCategoryStatus is GetTopHeadlineNewsByCategoryLoading) {
-              return const Center(child: CircularProgressIndicator());
+              return NewsUi(null, true);
             }
             if (state.getTopHeadlineNewsByCategoryStatus is GetTopHeadlineNewsByCategorySuccess) {
               var data = state.getTopHeadlineNewsByCategoryStatus as GetTopHeadlineNewsByCategorySuccess;
-              return NewsUi(data.newsEntity.articles);
+              return NewsUi(data.newsEntity.articles, false);
             }
             if (state.getTopHeadlineNewsBySourceStatus is GetTopHeadlineNewsBySourceLoading) {
+              return NewsUi(null, true);
+            }
+            if (state.getCacheArticlesStatus is GetCachedArticlesLoading) {
               return const Center(child: CircularProgressIndicator());
             }
             if (state.getTopHeadlineNewsBySourceStatus is GetTopHeadlineNewsBySourceSuccess) {
               var data = state.getTopHeadlineNewsBySourceStatus as GetTopHeadlineNewsBySourceSuccess;
-              return NewsUi(data.newsEntity.articles);
+              return NewsUi(data.newsEntity.articles, false);
             }
             return Padding(
               padding: EdgeInsets.symmetric(vertical: 16, horizontal: 16),
@@ -146,7 +162,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget NewsUi(List<Article> articles) {
+  Widget NewsUi(List<Article>? remoteArticles, bool isRemoteLoading) {
     return NestedScrollView(
       headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
         return [
@@ -167,15 +183,25 @@ class _HomeScreenState extends State<HomeScreen> {
                         SizedBox(height: 20.h),
                         CustomTextField(hintText: 'search your latest news...',
                             controller: _searchController,
-                            textInputType: TextInputType.text),
+                            textInputType: TextInputType.text,
+                            onClicked: (){
+                              FocusManager.instance.primaryFocus?.unfocus();
+                              Navigator.of(context, rootNavigator: true).push(
+                                  MaterialPageRoute(builder: (context) => SearchScreen()
+                                  )).then((_){
+                                _isGetRemoteArticles = false;
+                                _newsBloc.add(GetCacheArticlesEvent());
+                              });
+                            },
+                            ),
                         Container(
-                          height: 0.5 * 0.3 * MediaQuery.of(context).size.height,
+                          height: 0.6 * 0.4 * MediaQuery.of(context).size.height,
                           margin: const EdgeInsets.only(top: 8),
-                          child: Image.asset('assets/images/img_news.jpg')/*ListView.builder(
+                          child: cacheArticles.isEmpty ? Image.asset('assets/images/img_news.jpg') : ListView.builder(
                             scrollDirection: Axis.horizontal,
-                            itemCount: articles.length,
+                            itemCount: cacheArticles.length,
                             itemBuilder: (context, index) {
-                              final article = articles[index];
+                              final article = cacheArticles[index];
                               return Padding(
                                 padding: const EdgeInsets.only(
                                     right: 8, left: 8),
@@ -188,15 +214,26 @@ class _HomeScreenState extends State<HomeScreen> {
                                       .of(context)
                                       .size
                                       .width,
-                                  child: TopNewsItem(
-                                    imageUrl: article.urlToImage!,
-                                    title: article.title!,
-                                    source: article.source?.name,
-                                    publishedAt: article.publishedAt!,),
+                                  child: GestureDetector(
+                                    onTap: (){
+                                      FocusManager.instance.primaryFocus?.unfocus();
+                                      Navigator.of(context, rootNavigator: true).push(
+                                          MaterialPageRoute(builder: (context) => NewsDetailsScreen(article: article,)
+                                          )).then((_){
+                                            _isGetRemoteArticles = false;
+                                            _newsBloc.add(GetCacheArticlesEvent());
+                                      });
+                                    },
+                                    child: TopNewsItem(
+                                      imageUrl: article.urlToImage!,
+                                      title: article.title!,
+                                      source: article.source?.name,
+                                      publishedAt: article.publishedAt!,),
+                                  ),
                                 ),
                               );
                             },
-                          )*/,
+                          ),
                         ),
                       ]),)),)
         ];
@@ -213,6 +250,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 padding: EdgeInsets.symmetric(horizontal: 8.w),
                 child: GestureDetector(
                   onTap: () {
+                    FocusManager.instance.primaryFocus?.unfocus();
                     if (!selectedItem[index]) {
                       setState(() {
                         for (int i = 0; i < selectedItem.length; i++) {
@@ -251,28 +289,36 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         SizedBox(height: 24.h,),
-        Expanded(child: ListView.builder(physics: BouncingScrollPhysics(),
-            itemCount: articles.length,
+        Expanded(child: isRemoteLoading ? const Center(child: CircularProgressIndicator(),) : ListView.builder(physics: BouncingScrollPhysics(),
+            itemCount: remoteArticles?.length,
             itemBuilder: (context, index) {
-              Article article = articles[index];
+              Article article = remoteArticles![index];
               if(index != 0 && index % 3 == 0){
-              return GestureDetector(
-                onTap: (){
-                  Navigator.of(context, rootNavigator: true).push(
-                      MaterialPageRoute(builder: (context) => NewsDetailsScreen(article: article,)
-                      ));
-                },
-                child: MiddleNewsItem(imageUrl: article.urlToImage,
-                    title: article.title!,
-                    author: article.author,
-                    publishedAt: article.publishedAt!),
-              );
+                return GestureDetector(
+                  onTap: (){
+                    FocusManager.instance.primaryFocus?.unfocus();
+                    Navigator.of(context, rootNavigator: true).push(
+                        MaterialPageRoute(builder: (context) => NewsDetailsScreen(article: article,)
+                        )).then((_){
+                          _isGetRemoteArticles = false;
+                          _newsBloc.add(GetCacheArticlesEvent());
+                    });
+                  },
+                  child: MiddleNewsItem(imageUrl: article.urlToImage,
+                      title: article.title!,
+                      author: article.author,
+                      publishedAt: article.publishedAt!),
+                );
               }
               return GestureDetector(
                 onTap: (){
+                  FocusManager.instance.primaryFocus?.unfocus();
                   Navigator.of(context, rootNavigator: true).push(
                       MaterialPageRoute(builder: (context) => NewsDetailsScreen(article: article,)
-                      ));
+                      )).then((_){
+                        _isGetRemoteArticles = false;
+                        _newsBloc.add(GetCacheArticlesEvent());
+                  });
                 },
                 child: NewsItem(imageUrl: article.urlToImage,
                     title: article.title!,

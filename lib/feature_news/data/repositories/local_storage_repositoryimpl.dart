@@ -64,4 +64,14 @@ class LocalStorageNewsRepositoryImpl extends LocalStorageNewsRepository {
       return DataFailed(e.toString());
     }
   }
+
+  @override
+  Future<DataState<List<Article>>> getCashedArticles() async {
+    try{
+      List<Article> articles = await localDataProviderNews.getCashedArticles();
+      return DataSuccess(articles);
+    } catch(e){
+      return DataFailed(e.toString());
+    }
+  }
 }

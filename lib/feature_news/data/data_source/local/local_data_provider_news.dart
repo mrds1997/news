@@ -45,26 +45,25 @@ class LocalDataProviderNews {
   }
 
   Future<int> saveArticle(Article article) async {
-    /*Database db = await DatabaseHelper().database;
-    return await db.insert('RemindedHoliday', remindedHolidayModel.toMap(), conflictAlgorithm: ConflictAlgorithm.replace);*/
     Database db = await DatabaseHelper().database;
-
-    // Check if a record with the same holidayId exists
     List<Map<String, dynamic>> existingRecords = await db.query(
       'Article',
       where: 'articleId = ?',
       whereArgs: [article.articleId],
     );
-    //debugger();
     if (existingRecords.isNotEmpty) {
       return await db.delete('Article', where: 'articleId = ?', whereArgs: [article.articleId]);
     } else {
       return db.insert('Article', article.toMap());
-
-        /*await db.rawInsert(
-          'INSERT INTO Article(articleId, title, description, content, publishAt, source, url) VALUES(?, ?, ?)',
-          ['another name', 12345678, 3.1416])*/;
     }
+  }
+
+  Future<List<Article>> getCashedArticles() async {
+    Database db = await DatabaseHelper().database;
+    final List<Map<String, dynamic>> maps = await db.query('Article');
+    return List.generate(maps.length, (i) {
+      return Article.fromMap(maps[i]);
+    });
 
   }
 
