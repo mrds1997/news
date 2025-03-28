@@ -55,6 +55,10 @@ class MiddleNewsItem extends StatelessWidget {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(24.r),
                 child: imageUrl != null ?Image.network(
+                  errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace){
+                    return Image.asset('assets/images/img_news.jpg',fit: BoxFit.cover,
+                        width: 150.w,);
+                  },
                   imageUrl!,
                   fit: BoxFit.cover,
                   width: double.infinity,

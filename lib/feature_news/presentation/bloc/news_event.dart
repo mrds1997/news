@@ -33,3 +33,15 @@ class IsArticleSavedEvent extends NewsEvent {
 }
 class GetCacheArticlesEvent extends NewsEvent {}
 
+class GetSourcesEvent extends NewsEvent {
+  NewsParam param;
+  GetSourcesEvent(this.param);
+}
+class GetCacheNewsMetasEvent extends NewsEvent {}
+
+class SaveNewsMetaEvent extends NewsEvent {
+  NewsMeta param;
+  SaveNewsMetaEvent(this.param);
+}
+
+

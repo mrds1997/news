@@ -7,8 +7,13 @@ import 'package:flutter_web_frame/flutter_web_frame.dart';
 import 'package:news/feature_news/presentation/screen/home_screen.dart';
 
 import 'core/utils/my_custom_scroll_behavior.dart';
+import 'locator.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await setupNewsFeature();
+
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
     systemNavigationBarColor: Colors.white38, // navigation bar color
     statusBarColor: Colors.white38, // status bar color

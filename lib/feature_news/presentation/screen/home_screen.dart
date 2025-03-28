@@ -14,6 +14,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:news/core/models/article.dart';
 import 'package:news/core/models/news_meta.dart';
+import 'package:news/core/models/source.dart';
 import 'package:news/core/params/news_param.dart';
 import 'package:news/core/utils/meta_type.dart';
 import 'package:news/core/widgets/custom_text_field.dart';
@@ -25,19 +26,24 @@ import 'package:news/feature_news/data/data_source/remote/api_provider_news.dart
 import 'package:news/feature_news/data/repositories/local_storage_repositoryimpl.dart';
 import 'package:news/feature_news/data/repositories/news_repositoryimpl.dart';
 import 'package:news/feature_news/domain/usecases/get_cache_articles_usecase.dart';
+import 'package:news/feature_news/domain/usecases/get_sources_usecase.dart';
 import 'package:news/feature_news/domain/usecases/get_top_headline_news_by_category_usecase.dart';
 import 'package:news/feature_news/domain/usecases/get_top_headline_news_by_source_usecase.dart';
 import 'package:news/feature_news/domain/usecases/get_top_headline_news_usecase.dart';
 import 'package:news/feature_news/domain/usecases/is_article_saved_usecase.dart';
 import 'package:news/feature_news/domain/usecases/save_article_usecase.dart';
 import 'package:news/feature_news/presentation/bloc/get_all_news_status.dart';
+import 'package:news/feature_news/presentation/bloc/get_cache_newsmetas_status.dart';
 import 'package:news/feature_news/presentation/bloc/get_cached_articles_status.dart';
+import 'package:news/feature_news/presentation/bloc/get_sources_status.dart';
 import 'package:news/feature_news/presentation/bloc/get_top_headline_news.dart';
 import 'package:news/feature_news/presentation/bloc/get_top_headline_news_by_category_status.dart';
 import 'package:news/feature_news/presentation/bloc/get_top_headline_news_by_source_status.dart';
 import 'package:news/feature_news/presentation/bloc/news_bloc.dart';
+import 'package:news/feature_news/presentation/bloc/save_newsmeta_status.dart';
 import 'package:news/feature_news/presentation/screen/news_details_screen.dart';
 import 'package:news/feature_news/presentation/screen/search_screen.dart';
+import 'package:news/locator.dart';
 
 import '../../domain/usecases/get_news_usecase.dart';
 
@@ -55,12 +61,13 @@ class _HomeScreenState extends State<HomeScreen> {
   late NewsBloc _newsBloc;
 
   late TextEditingController _searchController;
+  late TextEditingController _searchSourceController;
 
   int selectedIndex = -1;
 
   Map<String, String> categoryAndSourceIds = {};
   List<NewsMeta> newsMetas = [];
-  late List<bool> selectedItem;
+
 
   List<Article> cacheArticles = [];
 
@@ -70,36 +77,12 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _searchController = TextEditingController();
-    _newsBloc = NewsBloc(GetNewsUseCase(NewsRepositoryImpl(ApiProviderNews())),
-        GetTopHeadlineNewsByCategoryUseCase(
-            NewsRepositoryImpl(ApiProviderNews())),
-        GetTopHeadlineNewsUseCase(NewsRepositoryImpl(ApiProviderNews())),
-        GetTopHeadlineNewsBySourceUseCase(NewsRepositoryImpl(ApiProviderNews())),
-        SaveArticleUseCase(LocalStorageNewsRepositoryImpl(LocalDataProviderNews())),
-        IsArticleSavedUseCase(LocalStorageNewsRepositoryImpl(LocalDataProviderNews())),
-        GetCacheArticlesUseCase(LocalStorageNewsRepositoryImpl(LocalDataProviderNews())));
-
-    newsMetas.addAll([
-      NewsMeta(name: 'Business', id: 'business', metaType: MetaType.CATEGORY),
-      NewsMeta(name: 'Entertainment', id: 'entertainment', metaType: MetaType.CATEGORY),
-      NewsMeta(name: 'General', id: 'general', metaType: MetaType.CATEGORY),
-      NewsMeta(name: 'Health', id: 'health', metaType: MetaType.CATEGORY),
-      NewsMeta(name: 'Science', id: 'science', metaType: MetaType.CATEGORY),
-      NewsMeta(name: 'Sports', id: 'sports', metaType: MetaType.CATEGORY),
-      NewsMeta(name: 'Technology', id: 'technology', metaType: MetaType.CATEGORY),
-      NewsMeta(name: 'Al Jazeera English', id: 'al-jazeera-english', metaType: MetaType.SOURCE),
-      NewsMeta(name: 'BBC News', id: 'bbc-news', metaType: MetaType.SOURCE),
-      NewsMeta(name: 'ABC News', id: 'abc-news', metaType: MetaType.SOURCE),
-      NewsMeta(name: 'Associated Press', id: 'associated-press', metaType: MetaType.SOURCE),
-
-    ]);
-
-    selectedItem = List.filled(newsMetas.length, false);
-    selectedItem[0] = true;
+    _searchSourceController = TextEditingController();
+    _newsBloc = locator<NewsBloc>();
 
     _isGetRemoteArticles = true;
 
-    _newsBloc.add(GetCacheArticlesEvent());
+    _newsBloc.add(GetCacheNewsMetasEvent());
 
   }
 
@@ -133,6 +116,92 @@ class _HomeScreenState extends State<HomeScreen> {
                 _newsBloc.add(GetTopHeadLineNewsByCategoryEvent(param));
               }
             }
+            if (state.getCacheNewsMetasStatus is GetCacheNewsMetasSuccess) {
+              var data = state.getCacheNewsMetasStatus as GetCacheNewsMetasSuccess;
+              newsMetas.clear();
+              newsMetas.addAll(data.newsMetas);
+              newsMetas[0].isSelected = true;
+
+              _newsBloc.add(GetCacheArticlesEvent());
+            }
+            if (state.getSourcesStatus is GetSourcesLoading) {
+              EasyLoading.show(status: "Please Wait...");
+            }
+            if (state.getSourcesStatus is GetSourcesSuccess) {
+              EasyLoading.dismiss();
+              var data = state.getSourcesStatus as GetSourcesSuccess;
+              List<Source> sources = data.sourceEntity.sources;
+              showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  backgroundColor: Colors.white,
+                  builder: (context) {
+                    return Padding(
+                      padding: EdgeInsets.only(top: 16.h),
+                      child: Container(
+                        width: double.infinity,
+                        height: 0.7 * MediaQuery.of(context).size.height,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            CustomTextField(hintText: 'search your sources...',
+                              controller: _searchSourceController,
+                              textInputType: TextInputType.text,
+                            ),
+                            SizedBox(height: 16.h,),
+                            Expanded(
+                              child: ListView.builder(physics: BouncingScrollPhysics(),
+                                  itemCount: sources.length,
+                                  itemBuilder: (context, index) {
+                                    Source source = sources[index];
+                                    return Padding(
+                                      padding:  EdgeInsets.only(top: 8.h),
+                                      child:  Container(
+                                        padding: EdgeInsets.symmetric(horizontal: 16.w),
+                                        height: 0.1 * 0.7* MediaQuery.of(context).size.height,
+                                        child: Center(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              GestureDetector(
+                                                onTap: (){
+                                                  Navigator.of(context).pop(NewsMeta(name: source.name!, id: source.id!, metaType: MetaType.SOURCE, isSelected: false));
+                                                },
+                                                child: Container(
+                                                    width: double.infinity,
+                                                    child: Text(source.name ?? "", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),)),
+                                              ),
+                                              Divider(thickness: 0.2, color: Colors.grey,),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  }),
+                            )
+
+                          ],
+                        ),
+                      ),
+                    );
+                  }).then((newsMeta){
+                    if(!newsMetas.contains(newsMeta)){
+                      setState(() {
+                        newsMetas.add(newsMeta);
+                        _newsBloc.add(SaveNewsMetaEvent(newsMeta));
+                      });
+                    }
+              });
+            }
+            if (state.getSourcesStatus is GetSourcesError) {
+              EasyLoading.dismiss();
+              var data = state.getSourcesStatus as GetSourcesError;
+              if (data.error != null) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(data.error!)));
+              }
+            }
+
           },
           builder: (context, state) {
             if (state.getTopHeadlineNewsByCategoryStatus is GetTopHeadlineNewsByCategoryLoading) {
@@ -183,7 +252,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         SizedBox(height: 20.h),
                         CustomTextField(hintText: 'search your latest news...',
                             controller: _searchController,
-                            textInputType: TextInputType.text,
+                            textInputType: TextInputType.none,
                             onClicked: (){
                               FocusManager.instance.primaryFocus?.unfocus();
                               Navigator.of(context, rootNavigator: true).push(
@@ -242,21 +311,47 @@ class _HomeScreenState extends State<HomeScreen> {
         Container(
           height: 35.h,
           margin: EdgeInsets.only(top: 16.h),
-          child: ListView.builder(
+          child:  ListView.builder(
             scrollDirection: Axis.horizontal,
-            itemCount: newsMetas.length,
+            itemCount: newsMetas.length + 1,
             itemBuilder: (context, index) {
+
+              if(index == newsMetas.length){
+                return GestureDetector(
+                  onTap: (){
+                    NewsParam param = NewsParam();
+                    param.language = 'en';
+                    _newsBloc.add(GetSourcesEvent(param));
+                  },
+                  child: Container(
+                    margin: EdgeInsets.symmetric(horizontal: 8.w),
+                    padding: EdgeInsets.symmetric(
+                        horizontal: 8.w),
+                    decoration: BoxDecoration(
+                        color: Colors.black,
+                        borderRadius: BorderRadius.circular(10.r)
+                    ),
+                    child: Row(
+                      children: [
+                        Text('Add source', style: TextStyle(color: Colors.white),),
+                        Center(child: Icon(Icons.add, color: Colors.white,))
+                      ],
+                    ),
+                  ),
+                );
+              }
+
               return Padding(
                 padding: EdgeInsets.symmetric(horizontal: 8.w),
                 child: GestureDetector(
                   onTap: () {
                     FocusManager.instance.primaryFocus?.unfocus();
-                    if (!selectedItem[index]) {
+                    if (!newsMetas[index].isSelected) {
                       setState(() {
-                        for (int i = 0; i < selectedItem.length; i++) {
-                          selectedItem[i] = false;
+                        for (int i = 0; i < newsMetas.length; i++) {
+                          newsMetas[i].isSelected = false;
                         }
-                        selectedItem[index] = true;
+                        newsMetas[index].isSelected = true;
                         NewsParam param = NewsParam();
                         param.language = 'en';
                         if(newsMetas[index].metaType == MetaType.SOURCE){
@@ -273,12 +368,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     padding: EdgeInsets.symmetric(
                         horizontal: 8.w, vertical: 8.h),
                     decoration: BoxDecoration(
-                        color: selectedItem[index] ? Color(0xFF03009B) : Color(
+                        color: newsMetas[index].isSelected ? Color(0xFF03009B) : Color(
                             0xFFD9D9D9),
                         borderRadius: BorderRadius.circular(50.r)
                     ),
                     child: Center(child: Text(newsMetas[index].name,
-                      style: TextStyle(color: selectedItem[index]
+                      style: TextStyle(color: newsMetas[index].isSelected
                           ? Colors.white
                           : Colors.black, fontWeight: FontWeight.bold),)),
                   ),
@@ -286,7 +381,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               );
             },
-          ),
+          )
         ),
         SizedBox(height: 24.h,),
         Expanded(child: isRemoteLoading ? const Center(child: CircularProgressIndicator(),) : ListView.builder(physics: BouncingScrollPhysics(),

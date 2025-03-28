@@ -13,16 +13,17 @@ class ApiProviderNews {
   final baseUrl = Constants.baseUrl;
   final apiKey = Constants.apiKey;
 
- /* Future<dynamic> getSources(NewsParam param) async {
+  Future<dynamic> getSources(NewsParam param) async {
     try {
       var response = await ApiAccess.instance.makeHttpRequest("$baseUrl/top-headlines/sources", method: Method.GET, params: {
         "language": param.language,
+        "apiKey": apiKey
       });
       return response;
     } catch (e) {
       throw Exception(e.toString());
     }
-  }*/
+  }
 
   Future<dynamic> getAllNews(NewsParam param) async {
     try {

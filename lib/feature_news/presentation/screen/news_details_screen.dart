@@ -36,9 +36,11 @@ import 'package:news/feature_news/presentation/bloc/news_bloc.dart';
 import 'package:news/feature_news/presentation/bloc/save_article_status.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../locator.dart';
 import '../../data/data_source/local/local_data_provider_news.dart';
 import '../../data/repositories/local_storage_repositoryimpl.dart';
 import '../../domain/usecases/get_news_usecase.dart';
+import '../../domain/usecases/get_sources_usecase.dart';
 import '../../domain/usecases/is_article_saved_usecase.dart';
 import '../../domain/usecases/save_article_usecase.dart';
 
@@ -59,14 +61,7 @@ class _NewsDetailsScreenState extends State<NewsDetailsScreen> {
   @override
   void initState() {
     super.initState();
-    _newsBloc = NewsBloc(GetNewsUseCase(NewsRepositoryImpl(ApiProviderNews())),
-        GetTopHeadlineNewsByCategoryUseCase(
-            NewsRepositoryImpl(ApiProviderNews())),
-        GetTopHeadlineNewsUseCase(NewsRepositoryImpl(ApiProviderNews())),
-        GetTopHeadlineNewsBySourceUseCase(NewsRepositoryImpl(ApiProviderNews())),
-        SaveArticleUseCase(LocalStorageNewsRepositoryImpl(LocalDataProviderNews())),
-        IsArticleSavedUseCase(LocalStorageNewsRepositoryImpl(LocalDataProviderNews())),
-        GetCacheArticlesUseCase(LocalStorageNewsRepositoryImpl(LocalDataProviderNews())));
+    _newsBloc = locator<NewsBloc>();
 
     //_newsBloc.add(GetTopHeadLineNewsByCategoryEvent(param));
     _newsBloc.add(IsArticleSavedEvent(widget.article.articleId));
@@ -77,15 +72,17 @@ class _NewsDetailsScreenState extends State<NewsDetailsScreen> {
     return Scaffold(
       backgroundColor: Colors.white38,
       resizeToAvoidBottomInset: false,
-      body: SafeArea(child: BlocProvider(
+      body: SafeArea(
+          child: BlocProvider(
         create: (_) => _newsBloc,
         child: BlocConsumer<NewsBloc, NewsState>(
           listener: (context, state) {
             if (state.saveArticleStatus is SaveArticleError) {
-              SaveArticleError data = state.saveArticleStatus as SaveArticleError;
+              SaveArticleError data =
+                  state.saveArticleStatus as SaveArticleError;
               if (data.error != null) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(data.error!)));
+                ScaffoldMessenger.of(context)
+                    .showSnackBar(SnackBar(content: Text(data.error!)));
               }
             }
           },
@@ -102,18 +99,11 @@ class _NewsDetailsScreenState extends State<NewsDetailsScreen> {
             return const SizedBox();
           },
         ),
-      )
-          ),
+      )),
     );
   }
 
   Widget NewsDetailsUi() {
-    String firstPart = widget.article.content!.length > 150
-        ? widget.article.content!.substring(0, 150)
-        : widget.article.content!;
-    String secondPart = widget.article.content!.length > 150
-        ? widget.article.content!.substring(150)
-        : "";
     return Stack(
       children: [
         const SizedBox(
@@ -125,6 +115,15 @@ class _NewsDetailsScreenState extends State<NewsDetailsScreen> {
                 fit: BoxFit.fill,
                 width: double.infinity,
                 height: 0.52 * MediaQuery.of(context).size.height,
+                errorBuilder: (BuildContext context, Object exception,
+                    StackTrace? stackTrace) {
+                  return Image.asset(
+                    'assets/images/img_news.jpg',
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                    height: 0.52 * MediaQuery.of(context).size.height,
+                  );
+                },
               )
             : Image.asset('assets/images/img_news.jpg',
                 fit: BoxFit.fill,
@@ -151,7 +150,7 @@ class _NewsDetailsScreenState extends State<NewsDetailsScreen> {
                 ]
               )*/
                 ),
-            child:  Column(
+            child: Column(
               children: [
                 Row(
                   children: [
@@ -207,23 +206,29 @@ class _NewsDetailsScreenState extends State<NewsDetailsScreen> {
                         color: Colors.black,
                         fontWeight: FontWeight.normal,
                         fontSize: 16.sp)),
-                SizedBox(height: 16.h,),
+                SizedBox(
+                  height: 16.h,
+                ),
                 Text(
-                  widget.article.content!, // قسمت اول متن که همیشه نمایش داده می‌شود
+                  widget.article.content ?? "",
                   style: TextStyle(fontSize: 14.sp, color: Colors.black),
                 ),
                 Spacer(),
-                ElevatedButton(onPressed: (){
-                  _launchURL();
-                }, child: Text('See More'), style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFF07039C),
-                    foregroundColor: Colors.white,
-                    textStyle:  TextStyle(fontWeight: FontWeight.bold, fontSize: 16.sp),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20.r),
-                    ),
-                    minimumSize: Size(double.infinity, 50.h)
-                ),)
+                ElevatedButton(
+                  onPressed: () {
+                    _launchURL();
+                  },
+                  child: Text('See More'),
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: Color(0xFF07039C),
+                      foregroundColor: Colors.white,
+                      textStyle: TextStyle(
+                          fontWeight: FontWeight.bold, fontSize: 16.sp),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20.r),
+                      ),
+                      minimumSize: Size(double.infinity, 50.h)),
+                )
                 /* AnimatedCrossFade(
                       firstChild: Text(
                         secondPart,
@@ -246,25 +251,7 @@ class _NewsDetailsScreenState extends State<NewsDetailsScreen> {
             top: 16.h,
             right: 16.w,
             child: GestureDetector(
-              onTap: (){
-                _newsBloc.add(SaveArticleEvent(widget.article));
-              },
-              child: Container(
-                height: 42.h,
-                width: 42.w,
-                padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 10.w),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10.r),
-                  color: Color(0xFF08022B)
-                ),
-                child: _isSaved ? SvgPicture.asset('assets/images/ic_remove_fav.svg', color: Colors.white,) : SvgPicture.asset('assets/images/ic_add_fav.svg', color: Colors.white,),
-                      ),
-            )),
-        Positioned(
-            top: 16.h,
-            right: 16.w,
-            child: GestureDetector(
-              onTap: (){
+              onTap: () {
                 _newsBloc.add(SaveArticleEvent(widget.article));
               },
               child: Container(
@@ -273,16 +260,48 @@ class _NewsDetailsScreenState extends State<NewsDetailsScreen> {
                 padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 10.w),
                 decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10.r),
-                    color: Color(0xFF08022B)
-                ),
-                child: _isSaved ? SvgPicture.asset('assets/images/ic_remove_fav.svg', color: Colors.white,) : SvgPicture.asset('assets/images/ic_add_fav.svg', color: Colors.white,),
+                    color: Color(0xFF08022B)),
+                child: _isSaved
+                    ? SvgPicture.asset(
+                        'assets/images/ic_remove_fav.svg',
+                        color: Colors.white,
+                      )
+                    : SvgPicture.asset(
+                        'assets/images/ic_add_fav.svg',
+                        color: Colors.white,
+                      ),
+              ),
+            )),
+        Positioned(
+            top: 16.h,
+            right: 16.w,
+            child: GestureDetector(
+              onTap: () {
+                _newsBloc.add(SaveArticleEvent(widget.article));
+              },
+              child: Container(
+                height: 42.h,
+                width: 42.w,
+                padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 10.w),
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10.r),
+                    color: Color(0xFF08022B)),
+                child: _isSaved
+                    ? SvgPicture.asset(
+                        'assets/images/ic_remove_fav.svg',
+                        color: Colors.white,
+                      )
+                    : SvgPicture.asset(
+                        'assets/images/ic_add_fav.svg',
+                        color: Colors.white,
+                      ),
               ),
             )),
         Positioned(
             top: 16.h,
             left: 16.w,
             child: GestureDetector(
-              onTap: (){
+              onTap: () {
                 Navigator.of(context).pop();
               },
               child: Container(
@@ -291,9 +310,11 @@ class _NewsDetailsScreenState extends State<NewsDetailsScreen> {
                 padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 10.w),
                 decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10.r),
-                    color: Color(0xFF08022B)
+                    color: Color(0xFF08022B)),
+                child: SvgPicture.asset(
+                  'assets/images/ic_arrow_left.svg',
+                  color: Colors.white,
                 ),
-                child: SvgPicture.asset('assets/images/ic_arrow_left.svg', color: Colors.white,),
               ),
             ))
       ],
@@ -317,6 +338,7 @@ class _NewsDetailsScreenState extends State<NewsDetailsScreen> {
 
     return "$hour:$minute";
   }
+
   /*_launchURL() async {
     //debugger();
     print('url ${widget.article.url!}');
@@ -326,8 +348,8 @@ class _NewsDetailsScreenState extends State<NewsDetailsScreen> {
     }
   }*/
   _launchURL() async {
-     Uri uri = Uri.parse(widget.article.url!);
-    if (await canLaunchUrl(uri)){
+    Uri uri = Uri.parse(widget.article.url!);
+    if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } else {
       // can't launch url

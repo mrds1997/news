@@ -1,9 +1,11 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:news/core/models/news_meta.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../../../../core/models/article.dart';
 import '../../../../core/utils/database_helper.dart';
+import '../../../../core/utils/meta_type.dart';
 
 class LocalDataProviderNews {
   /*final SharedPreferences _storage;
@@ -56,6 +58,36 @@ class LocalDataProviderNews {
     } else {
       return db.insert('Article', article.toMap());
     }
+  }
+
+  Future<bool> saveNewsMeta(NewsMeta newsMeta) async {
+    try{
+      Database db = await DatabaseHelper().database;
+      List<Map<String, dynamic>> existingRecords = await db.query(
+        'NewsMeta',
+        where: 'newsMetaId = ?',
+        whereArgs: [newsMeta.id],
+      );
+      if (existingRecords.isEmpty) {
+        await db.insert('NewsMeta', newsMeta.toMap());
+      }
+      return true;
+    } catch(e){
+        print('e:' + e.toString());
+        return false;
+    }
+  }
+
+
+
+
+  Future<List<NewsMeta>> getCacheNewsMeta() async {
+    Database db = await DatabaseHelper().database;
+    final List<Map<String, dynamic>> maps = await db.query('NewsMeta');
+    return List.generate(maps.length, (i) {
+      return NewsMeta.fromMap(maps[i]);
+    });
+
   }
 
   Future<List<Article>> getCashedArticles() async {

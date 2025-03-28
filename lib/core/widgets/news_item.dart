@@ -30,6 +30,11 @@ class NewsItem extends StatelessWidget {
                 fit: BoxFit.cover,
                 width: 150.w,
                 height: double.infinity,
+                errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace){
+                  return Image.asset('assets/images/img_news.jpg',fit: BoxFit.cover,
+                      width: 150.w,
+                      height: double.infinity);
+                },
               ) : Image.asset('assets/images/img_news.jpg',fit: BoxFit.cover,
                 width: 150.w,
                 height: double.infinity),

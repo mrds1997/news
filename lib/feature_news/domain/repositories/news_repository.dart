@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:news/core/models/news_entity.dart';
+import 'package:news/core/models/source_entity.dart';
 
 
 
@@ -12,4 +13,5 @@ abstract class NewsRepository{
   Future<DataState<NewsEntity>> getTopHeadlineNewsByCategory(NewsParam param);
   Future<DataState<NewsEntity>> getTopHeadlineNewsBySource(NewsParam param);
   Future<DataState<NewsEntity>> getTopHeadlineNews(NewsParam param);
+  Future<DataState<SourceEntity>> getSources(NewsParam param);
 }

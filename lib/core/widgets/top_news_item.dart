@@ -26,6 +26,11 @@ class TopNewsItem extends StatelessWidget {
             fit: BoxFit.cover,
             width: double.infinity,
             height: double.infinity,
+            errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace){
+              return Image.asset('assets/images/img_news.jpg',fit: BoxFit.cover,
+                  width: double.infinity,
+                  height: double.infinity);
+            },
           ),
           Positioned(
               top: 8,

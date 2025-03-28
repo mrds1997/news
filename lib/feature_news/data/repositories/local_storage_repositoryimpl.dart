@@ -3,6 +3,7 @@
 
 
 import 'package:news/core/models/article.dart';
+import 'package:news/core/models/news_meta.dart';
 
 import '../../../core/params/write_localstorage_param.dart';
 import '../../../core/resources/data_state.dart';
@@ -70,6 +71,26 @@ class LocalStorageNewsRepositoryImpl extends LocalStorageNewsRepository {
     try{
       List<Article> articles = await localDataProviderNews.getCashedArticles();
       return DataSuccess(articles);
+    } catch(e){
+      return DataFailed(e.toString());
+    }
+  }
+
+  @override
+  Future<DataState<List<NewsMeta>>> getCacheNewsMeta() async {
+    try{
+      List<NewsMeta> newsMetas = await localDataProviderNews.getCacheNewsMeta();
+      return DataSuccess(newsMetas);
+    } catch(e){
+      return DataFailed(e.toString());
+    }
+  }
+
+  @override
+  Future<DataState<bool>> saveNewsMeta(NewsMeta newsMeta) async {
+    try{
+      bool result = await localDataProviderNews.saveNewsMeta(newsMeta);
+      return DataSuccess(result);
     } catch(e){
       return DataFailed(e.toString());
     }
