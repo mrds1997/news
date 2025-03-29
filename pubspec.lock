@@ -105,6 +105,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.1"
+  connectivity_wrapper:
+    dependency: "direct main"
+    description:
+      name: connectivity_wrapper
+      sha256: "6e4a1317bcfc4101cd993abe69fa042e5dffbd87fcfd74a2b9ec00f172e10a88"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.2.6"
   cross_file:
     dependency: transitive
     description:

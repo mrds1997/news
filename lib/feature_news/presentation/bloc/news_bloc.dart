@@ -88,7 +88,9 @@ class NewsBloc extends Bloc<NewsEvent, NewsState> {
       if (dataState is DataSuccess) {
         emit(state.copyWith(newGetTopHeadlineNewsByCategoryStatus: GetTopHeadlineNewsByCategorySuccess(dataState.data)));
       } else {
+        print('error category event');
         emit(state.copyWith(newGetTopHeadlineNewsByCategoryStatus: GetTopHeadlineNewsByCategoryError(dataState.error)));
+        emit(state.copyWith(newGetTopHeadlineNewsByCategoryStatus: GetTopHeadlineNewsByCategoryNoAction()));
       }
     });
 
@@ -100,6 +102,7 @@ class NewsBloc extends Bloc<NewsEvent, NewsState> {
         emit(state.copyWith(newGetTopHeadlineNewsBySourceStatus: GetTopHeadlineNewsBySourceSuccess(dataState.data)));
       } else {
         emit(state.copyWith(newGetTopHeadlineNewsBySourceStatus: GetTopHeadlineNewsBySourceError(dataState.error)));
+        emit(state.copyWith(newGetTopHeadlineNewsBySourceStatus: GetTopHeadlineNewsBySourceNoAction()));
       }
     });
 

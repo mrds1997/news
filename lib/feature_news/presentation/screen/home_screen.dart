@@ -2,6 +2,7 @@ import 'dart:io';
 
 
 import 'package:awesome_dialog/awesome_dialog.dart';
+import 'package:connectivity_wrapper/connectivity_wrapper.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -102,14 +103,11 @@ class _HomeScreenState extends State<HomeScreen> {
       body: SafeArea(
           child: BlocConsumer<NewsBloc, NewsState>(
         listener: (context, state) {
-          if (state.getTopHeadlineNewsByCategoryStatus
-              is GetTopHeadlineNewsByCategoryError) {
-            GetTopHeadlineNewsByCategoryError data =
-                state.getTopHeadlineNewsByCategoryStatus
-                    as GetTopHeadlineNewsByCategoryError;
+          if (state.getTopHeadlineNewsByCategoryStatus is GetTopHeadlineNewsByCategoryError) {
+            GetTopHeadlineNewsByCategoryError data = state.getTopHeadlineNewsByCategoryStatus as GetTopHeadlineNewsByCategoryError;
+            print('errorrrrrrrrrrrrrrrrrr');
             if (data.error != null) {
-              ScaffoldMessenger.of(context)
-                  .showSnackBar(SnackBar(content: Text(data.error!)));
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(data.error!)));
             }
           }
           if (state.getCacheArticlesStatus is GetCachedArticlesSuccess) {
@@ -128,8 +126,7 @@ class _HomeScreenState extends State<HomeScreen> {
             }
           }
           if (state.getCacheNewsMetasStatus is GetCacheNewsMetasSuccess) {
-            var data =
-                state.getCacheNewsMetasStatus as GetCacheNewsMetasSuccess;
+            var data = state.getCacheNewsMetasStatus as GetCacheNewsMetasSuccess;
             newsMetas.clear();
             newsMetas.addAll(data.newsMetas);
             newsMetas[0].isSelected = true;
@@ -273,12 +270,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 as GetTopHeadlineNewsBySourceSuccess;
             return NewsUi(data.newsEntity.articles, false);
           }
-          return Padding(
-            padding: EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-            child: Center(
-              child: Text('Error in Load Data', style: TextStyle(color: Colors.redAccent),),
-            ),
-          );
+          return NewsUi(null, false);
         },
       )),
     );
@@ -431,7 +423,6 @@ class _HomeScreenState extends State<HomeScreen> {
                             if (newsMetas[index].metaType == MetaType.SOURCE) {
                               param.source = newsMetas[index].id;
                               BlocProvider.of<NewsBloc>(context).add(GetTopHeadLineNewsBySourceEvent(param));
-
                             } else {
                               param.category = newsMetas[index].id;
                               BlocProvider.of<NewsBloc>(context).add(GetTopHeadLineNewsByCategoryEvent(param));
@@ -465,56 +456,55 @@ class _HomeScreenState extends State<HomeScreen> {
             height: 24.h,
           ),
           Expanded(
-              child: isRemoteLoading
+              child: ConnectivityWidgetWrapper(child: isRemoteLoading
                   ? const Center(
-                      child: CircularProgressIndicator(),
-                    )
-                  : ListView.builder(
-                      physics: BouncingScrollPhysics(),
-                      itemCount: remoteArticles?.length,
-                      itemBuilder: (context, index) {
-                        Article article = remoteArticles![index];
-                        if (index != 0 && index % 3 == 0) {
-                          return GestureDetector(
-                            onTap: () {
-                              FocusManager.instance.primaryFocus?.unfocus();
-                              Navigator.of(context, rootNavigator: true)
-                                  .push(MaterialPageRoute(
-                                      builder: (context) => NewsDetailsScreen(
-                                            article: article,
-                                          )))
-                                  .then((_) {
-                                _isGetRemoteArticles = false;
-                                BlocProvider.of<NewsBloc>(context).add(GetCacheArticlesEvent());
-                                  });
-                            },
-                            child: MiddleNewsItem(
-                                imageUrl: article.urlToImage,
-                                title: article.title!,
-                                author: article.author,
-                                publishedAt: article.publishedAt!),
-                          );
-                        }
-                        return GestureDetector(
-                          onTap: () {
-                            FocusManager.instance.primaryFocus?.unfocus();
-                            Navigator.of(context, rootNavigator: true)
-                                .push(MaterialPageRoute(
-                                    builder: (context) => NewsDetailsScreen(
-                                          article: article,
-                                        )))
-                                .then((_) {
-                              _isGetRemoteArticles = false;
-                              BlocProvider.of<NewsBloc>(context).add(GetCacheArticlesEvent());
-                                });
-                          },
-                          child: NewsItem(
-                              imageUrl: article.urlToImage,
-                              title: article.title!,
-                              author: article.author,
-                              publishedAt: article.publishedAt!),
-                        );
-                      }))
+                child: CircularProgressIndicator(),
+              ) : remoteArticles != null ? ListView.builder(
+                  physics: BouncingScrollPhysics(),
+                  itemCount: remoteArticles?.length,
+                  itemBuilder: (context, index) {
+                    Article article = remoteArticles![index];
+                    if (index != 0 && index % 3 == 0) {
+                      return GestureDetector(
+                        onTap: () {
+                          FocusManager.instance.primaryFocus?.unfocus();
+                          Navigator.of(context, rootNavigator: true)
+                              .push(MaterialPageRoute(
+                              builder: (context) => NewsDetailsScreen(
+                                article: article,
+                              )))
+                              .then((_) {
+                            _isGetRemoteArticles = false;
+                            BlocProvider.of<NewsBloc>(context).add(GetCacheArticlesEvent());
+                          });
+                        },
+                        child: MiddleNewsItem(
+                            imageUrl: article.urlToImage,
+                            title: article.title!,
+                            author: article.author,
+                            publishedAt: article.publishedAt!),
+                      );
+                    }
+                    return GestureDetector(
+                      onTap: () {
+                        FocusManager.instance.primaryFocus?.unfocus();
+                        Navigator.of(context, rootNavigator: true)
+                            .push(MaterialPageRoute(
+                            builder: (context) => NewsDetailsScreen(
+                              article: article,
+                            )))
+                            .then((_) {
+                          _isGetRemoteArticles = false;
+                          BlocProvider.of<NewsBloc>(context).add(GetCacheArticlesEvent());
+                        });
+                      },
+                      child: NewsItem(
+                          imageUrl: article.urlToImage,
+                          title: article.title!,
+                          author: article.author,
+                          publishedAt: article.publishedAt!),
+                    );
+                  }):SizedBox()))
         ],
       ),
     );

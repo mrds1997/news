@@ -1,3 +1,4 @@
+import 'package:connectivity_wrapper/connectivity_wrapper.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -23,7 +24,7 @@ void main() async {
     systemNavigationBarIconBrightness: Brightness.dark,
   ));
   runApp(MultiBlocProvider(providers: [
-    BlocProvider(create: (_)=>locator<NewsBloc>())
+    BlocProvider(create: (_)=>locator<NewsBloc>()),
   ], child: MyApp()));
 }
 
@@ -38,34 +39,23 @@ class MyApp extends StatelessWidget {
         designSize: Size(450, 812),
         minTextAdapt: true,
         splitScreenMode: false,
-        builder: (BuildContext context, child) => MaterialApp(
-          scrollBehavior: MyCustomScrollBehavior(),
-          initialRoute: "/",
-          onGenerateRoute: (RouteSettings settings) {
-            Widget routeWidget = HomeScreen();
-            /*final routeName = settings.name;
-            if (routeName != null) {
-              if (routeName.contains('/share/')) {
-                // Navigated to /book/:id
-                final shareToken = routeName.split('/share/').last;
-                print('shapreToken -> $shareToken');
-                routeWidget = TaskDetailsScreen(
-                  isDeepLink: true,
-                  shareToken: shareToken,
-                );
-              }
-
-            }*/
-            return MaterialPageRoute(
-              builder: (context) => routeWidget,
-              settings: settings,
-              fullscreenDialog: true,
-            );
-          },
-          title: 'News',
-          //home: SplashScreen(),
-          debugShowCheckedModeBanner: false,
-          builder: EasyLoading.init(),
+        builder: (BuildContext context, child) => ConnectivityAppWrapper(
+          app: MaterialApp(
+            scrollBehavior: MyCustomScrollBehavior(),
+            initialRoute: "/",
+            onGenerateRoute: (RouteSettings settings) {
+              Widget routeWidget = HomeScreen();
+              return MaterialPageRoute(
+                builder: (context) => routeWidget,
+                settings: settings,
+                fullscreenDialog: true,
+              );
+            },
+            title: 'News',
+            //home: SplashScreen(),
+            debugShowCheckedModeBanner: false,
+            builder: EasyLoading.init(),
+          ),
         ),
       ),
       maximumSize: const Size(450, 812),
