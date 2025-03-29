@@ -275,7 +275,9 @@ class _HomeScreenState extends State<HomeScreen> {
           }
           return Padding(
             padding: EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-            child: SizedBox(),
+            child: Center(
+              child: Text('Error in Load Data', style: TextStyle(color: Colors.redAccent),),
+            ),
           );
         },
       )),
