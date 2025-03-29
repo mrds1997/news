@@ -54,17 +54,15 @@ class NewsDetailsScreen extends StatefulWidget {
 }
 
 class _NewsDetailsScreenState extends State<NewsDetailsScreen> {
-  late NewsBloc _newsBloc;
+  //late NewsBloc _newsBloc;
   bool _isExpanded = false;
   bool _isSaved = false;
 
   @override
   void initState() {
     super.initState();
-    _newsBloc = locator<NewsBloc>();
-
-    //_newsBloc.add(GetTopHeadLineNewsByCategoryEvent(param));
-    _newsBloc.add(IsArticleSavedEvent(widget.article.articleId));
+    //_newsBloc.add(IsArticleSavedEvent(widget.article.articleId));
+    BlocProvider.of<NewsBloc>(context).add(IsArticleSavedEvent(widget.article.articleId));
   }
 
   @override
@@ -73,13 +71,11 @@ class _NewsDetailsScreenState extends State<NewsDetailsScreen> {
       backgroundColor: Colors.white38,
       resizeToAvoidBottomInset: false,
       body: SafeArea(
-          child: BlocProvider(
-        create: (_) => _newsBloc,
         child: BlocConsumer<NewsBloc, NewsState>(
           listener: (context, state) {
             if (state.saveArticleStatus is SaveArticleError) {
               SaveArticleError data =
-                  state.saveArticleStatus as SaveArticleError;
+              state.saveArticleStatus as SaveArticleError;
               if (data.error != null) {
                 ScaffoldMessenger.of(context)
                     .showSnackBar(SnackBar(content: Text(data.error!)));
@@ -99,7 +95,7 @@ class _NewsDetailsScreenState extends State<NewsDetailsScreen> {
             return const SizedBox();
           },
         ),
-      )),
+      ),
     );
   }
 
@@ -252,8 +248,8 @@ class _NewsDetailsScreenState extends State<NewsDetailsScreen> {
             right: 16.w,
             child: GestureDetector(
               onTap: () {
-                _newsBloc.add(SaveArticleEvent(widget.article));
-              },
+                BlocProvider.of<NewsBloc>(context).add(SaveArticleEvent(widget.article));
+                },
               child: Container(
                 height: 42.h,
                 width: 42.w,
@@ -277,8 +273,8 @@ class _NewsDetailsScreenState extends State<NewsDetailsScreen> {
             right: 16.w,
             child: GestureDetector(
               onTap: () {
-                _newsBloc.add(SaveArticleEvent(widget.article));
-              },
+                BlocProvider.of<NewsBloc>(context).add(SaveArticleEvent(widget.article));
+                },
               child: Container(
                 height: 42.h,
                 width: 42.w,

@@ -57,14 +57,18 @@ class MiddleNewsItem extends StatelessWidget {
                 child: imageUrl != null ?Image.network(
                   errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace){
                     return Image.asset('assets/images/img_news.jpg',fit: BoxFit.cover,
-                        width: 150.w,);
+                        width: double.infinity,);
                   },
                   imageUrl!,
                   fit: BoxFit.cover,
                   width: double.infinity,
                   
-                ) : Image.asset('assets/images/img_news.jpg',fit: BoxFit.cover,
-                    width: 150.w,),
+                ) : ClipRRect(
+
+                  borderRadius: BorderRadius.circular(24.r),
+                  child: Image.asset('assets/images/img_news.jpg',fit: BoxFit.cover,
+                      width: double.infinity),
+                ),
               ),
             ),
           ],

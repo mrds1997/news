@@ -55,7 +55,7 @@ class SearchScreen extends StatefulWidget {
 }
 
 class _SearchScreenState extends State<SearchScreen> {
-  late NewsBloc _newsBloc;
+  //late NewsBloc _newsBloc;
 
 
   late TextEditingController _searchController;
@@ -70,7 +70,7 @@ class _SearchScreenState extends State<SearchScreen> {
   void initState() {
     super.initState();
     _searchController = TextEditingController();
-    _newsBloc = locator<NewsBloc>();
+    //_newsBloc = locator<NewsBloc>();
   }
 
   @override
@@ -78,64 +78,61 @@ class _SearchScreenState extends State<SearchScreen> {
     return Scaffold(
       backgroundColor: Colors.white38,
       resizeToAvoidBottomInset: false,
-      body: SafeArea(child: BlocProvider(
-        create: (_) => _newsBloc,
-        child: BlocConsumer<NewsBloc, NewsState>(
-          listener: (context, state) {
-            if (state.getAllNewsStatus is GetAllNewsError) {
-              GetAllNewsError data = state.getAllNewsStatus as GetAllNewsError;
-              if (data.error != null) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(data.error!)));
-              }
+      body: SafeArea(child: BlocConsumer<NewsBloc, NewsState>(
+        listener: (context, state) {
+          if (state.getAllNewsStatus is GetAllNewsError) {
+            GetAllNewsError data = state.getAllNewsStatus as GetAllNewsError;
+            if (data.error != null) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(data.error!)));
             }
-          },
-          builder: (context, state) {
-            /*if (state.getAllNewsStatus is GetAllNewsLoading) {
+          }
+        },
+        builder: (context, state) {
+          /*if (state.getAllNewsStatus is GetAllNewsLoading) {
               return const Center(child: CircularProgressIndicator(),);
             }*/
-            if(state.getAllNewsStatus is GetAllNewsSuccess){
-              var data = state.getAllNewsStatus as GetAllNewsSuccess;
-              return SearchUi(data.newsEntity.articles);
-            }
-            if(state.getAllNewsStatus is GetAllNewsError){
-              var data = state.getAllNewsStatus as GetAllNewsError;
-              return Center(child: Text(data.error!, style: const TextStyle(color: Colors.redAccent),),);
-            }
-            return Column(
-              children: [
-                Row(
+          if(state.getAllNewsStatus is GetAllNewsSuccess){
+            var data = state.getAllNewsStatus as GetAllNewsSuccess;
+            return SearchUi(data.newsEntity.articles);
+          }
+          if(state.getAllNewsStatus is GetAllNewsError){
+            var data = state.getAllNewsStatus as GetAllNewsError;
+            return Center(child: Text(data.error!, style: const TextStyle(color: Colors.redAccent),),);
+          }
+          return Column(
+            children: [
+              Row(
 
-                  children: [
-                    SizedBox(width: 16.w,),
-                    GestureDetector(
-                        onTap: (){
-                          Navigator.of(context).pop();
-                        },
-                        child: SvgPicture.asset('assets/images/ic_arrow_left.svg', width: 24.w, height: 24.h,)),
-                    SizedBox(width: 16.w,),
-                    Expanded(
-                      child: CustomTextField(hintText: 'search your latest news...',
-                        controller: _searchController,
-                        textInputType: TextInputType.text,
-                        autoFocus: true,
-                        onChangedValue: (content){
-                          NewsParam param = NewsParam();
-                          param.language = 'en';
-                          param.query = content;
-                          debounce(const Duration(milliseconds: 500), _newsBloc.add, [GetAllNewsEvent(param)]);
-                        },
-                      ),
+                children: [
+                  SizedBox(width: 16.w,),
+                  GestureDetector(
+                      onTap: (){
+                        Navigator.of(context).pop();
+                      },
+                      child: SvgPicture.asset('assets/images/ic_arrow_left.svg', width: 24.w, height: 24.h,)),
+                  SizedBox(width: 16.w,),
+                  Expanded(
+                    child: CustomTextField(hintText: 'search your latest news...',
+                      controller: _searchController,
+                      textInputType: TextInputType.text,
+                      autoFocus: true,
+                      onChangedValue: (content){
+                        NewsParam param = NewsParam();
+                        param.language = 'en';
+                        param.query = content;
+                        debounce(const Duration(milliseconds: 500), BlocProvider.of<NewsBloc>(context).add, [GetAllNewsEvent(param)]);
+                      },
                     ),
-                  ],
-                ),
-              ],
-            );
-          },
-        ),
-      )
-          ),
-    );
+                  ),
+                ],
+              ),
+            ],
+          );
+        },
+      ))
+          );
+
   }
 
   Widget SearchUi(List<Article> articles) {
@@ -158,8 +155,8 @@ class _SearchScreenState extends State<SearchScreen> {
                   NewsParam param = NewsParam();
                   param.language = 'en';
                   param.query = content;
-                  debounce(const Duration(milliseconds: 500), _newsBloc.add, [GetAllNewsEvent(param)]);
-                },
+                  debounce(const Duration(milliseconds: 200),BlocProvider.of<NewsBloc>(context).add, [GetAllNewsEvent(param)]);
+                  },
               ),
             ),
           ],

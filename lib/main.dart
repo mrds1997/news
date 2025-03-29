@@ -1,9 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_web_frame/flutter_web_frame.dart';
+import 'package:news/feature_news/presentation/bloc/news_bloc.dart';
 import 'package:news/feature_news/presentation/screen/home_screen.dart';
 
 import 'core/utils/my_custom_scroll_behavior.dart';
@@ -20,7 +22,9 @@ void main() async {
     statusBarIconBrightness: Brightness.dark,
     systemNavigationBarIconBrightness: Brightness.dark,
   ));
-  runApp(const MyApp());
+  runApp(MultiBlocProvider(providers: [
+    BlocProvider(create: (_)=>locator<NewsBloc>())
+  ], child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
