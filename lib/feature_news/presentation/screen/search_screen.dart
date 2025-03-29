@@ -118,10 +118,13 @@ class _SearchScreenState extends State<SearchScreen> {
                       textInputType: TextInputType.text,
                       autoFocus: true,
                       onChangedValue: (content){
-                        NewsParam param = NewsParam();
-                        param.language = 'en';
-                        param.query = content;
-                        debounce(const Duration(milliseconds: 500), BlocProvider.of<NewsBloc>(context).add, [GetAllNewsEvent(param)]);
+                      if(content.isNotEmpty){
+                          NewsParam param = NewsParam();
+                          param.language = 'en';
+                          param.query = content;
+                          debounce(const Duration(milliseconds: 500), BlocProvider.of<NewsBloc>(context).add, [GetAllNewsEvent(param)]);
+
+                        }
                       },
                     ),
                   ),
@@ -152,10 +155,12 @@ class _SearchScreenState extends State<SearchScreen> {
                 controller: _searchController,
                 textInputType: TextInputType.text,
                 onChangedValue: (content){
-                  NewsParam param = NewsParam();
-                  param.language = 'en';
-                  param.query = content;
-                  debounce(const Duration(milliseconds: 200),BlocProvider.of<NewsBloc>(context).add, [GetAllNewsEvent(param)]);
+                  if(content.isNotEmpty){
+                    NewsParam param = NewsParam();
+                    param.language = 'en';
+                    param.query = content;
+                    debounce(const Duration(milliseconds: 200),BlocProvider.of<NewsBloc>(context).add, [GetAllNewsEvent(param)]);
+                  }
                   },
               ),
             ),

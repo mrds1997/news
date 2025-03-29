@@ -94,7 +94,7 @@ class CustomTextField extends StatelessWidget {
                   height: 19,
                 ),
               ),
-              suffixIcon: Padding(
+              /*suffixIcon: Padding(
                 padding:  EdgeInsets.only(right: 8.w, top: 8.h, bottom: 8.h),
                 child: Container(
                   width: 40.w,
@@ -105,7 +105,7 @@ class CustomTextField extends StatelessWidget {
                   ),
                   child: Center(child: Icon(Icons.mic, color: Colors.white,)),
                 ),
-              ),
+              ),*/
               //constraints: BoxConstraints(maxHeight: height ?? 100.h, maxWidth: double.infinity),
               contentPadding: EdgeInsets.symmetric(
                   vertical: 16.h,
