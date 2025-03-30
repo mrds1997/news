@@ -11,3 +11,6 @@ A **news application** built with **Flutter**, following **Clean Architecture** 
 ✅ **get_it** for Dependency Injection  
 ✅ **url_launcher** to open news links  
 ✅ **Custom UI components**
+
+
+https://github.com/user-attachments/assets/16fe86a4-6687-41e4-a9db-fd7335e86f9a
