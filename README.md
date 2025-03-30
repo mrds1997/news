@@ -1,20 +1,13 @@
-<<<<<<< HEAD
-# news
+# 📰 Flutter News App  
 
-A new Flutter project.
+A **news application** built with **Flutter**, following **Clean Architecture** and **BLoC** for state management. This app fetches news from multiple sources using the free API service from **newsapi.org**.
 
-## Getting Started
+## 📌 Features  
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
-=======
-# news
->>>>>>> 4fc3dc56507b04e3b710a416e3b0496b351f0a0b
+✅ **Clean Architecture + BLoC** for state management  
+✅ **flutter_screen_util** for responsive UI  
+✅ **sqflite** for local storage and offline access to news  
+✅ **connectivity_wrapper** to check internet connectivity  
+✅ **get_it** for Dependency Injection  
+✅ **url_launcher** to open news links  
+✅ **Custom UI components**
