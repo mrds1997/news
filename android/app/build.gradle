@@ -29,11 +29,18 @@ android {
     namespace = "com.example.news"
     compileSdk = 34/*flutter.compileSdkVersion*/
     //ndkVersion = flutter.ndkVersion
-    ndkVersion "25.1.8937393"
+    //ndkVersion "25.1.8937393"
+    ndkVersion = "26.1.10909125"
+
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = '1.8'
     }
 
     defaultConfig {

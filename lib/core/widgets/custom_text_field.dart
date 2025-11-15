@@ -22,6 +22,7 @@ class CustomTextField extends StatelessWidget {
   final TextInputAction textInputAction;
   final Function? onClicked;
   final bool autoFocus;
+  final String? prefixIconPath;
 
   CustomTextField(
       {required this.hintText,
@@ -39,23 +40,14 @@ class CustomTextField extends StatelessWidget {
       this.onSuffixIconClicked,
       this.textInputAction = TextInputAction.none,
       this.onClicked,
-      this.autoFocus = false});
+      this.autoFocus = false,
+      this.prefixIconPath});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
       child: Container(
-         decoration: BoxDecoration(
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.3),
-                blurRadius: 10,
-                spreadRadius: 2,
-                offset: Offset(0, 0),
-              ),
-            ],
-          ),
         child: TextFormField(
           controller: controller,
           cursorColor: Theme.of(context).primaryColor,
@@ -84,16 +76,16 @@ class CustomTextField extends StatelessWidget {
               fillColor: Colors.white,
               hintText: hintText,
               hintStyle: TextStyle(color: Theme.of(context).hintColor),
-              prefixIcon: Padding(
+              prefixIcon: prefixIconPath != null ? Padding(
                 padding: EdgeInsets.symmetric(
                     horizontal: 8,
                     vertical: 8),
-                child:SvgPicture.asset(
-                  'assets/images/ic_search.svg',
+                child: SvgPicture.asset(
+                  prefixIconPath!,
                   width: 19,
                   height: 19,
                 ),
-              ),
+              ) : null,
               /*suffixIcon: Padding(
                 padding:  EdgeInsets.only(right: 8.w, top: 8.h, bottom: 8.h),
                 child: Container(
@@ -111,8 +103,10 @@ class CustomTextField extends StatelessWidget {
                   vertical: 16.h,
                   horizontal: 16.w),
               border: OutlineInputBorder(
+
                   borderRadius: BorderRadius.circular(16.r),
-                  borderSide: BorderSide.none,)),
+
+                  borderSide: BorderSide(color: Colors.black),)),
         ),
       ),
     );

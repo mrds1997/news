@@ -38,14 +38,14 @@ import 'package:news/feature_news/presentation/bloc/news_bloc.dart';
 import 'package:news/feature_news/presentation/bloc/save_article_status.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../../locator.dart';
-import '../../data/data_source/local/local_data_provider_news.dart';
-import '../../data/repositories/local_storage_repositoryimpl.dart';
-import '../../domain/usecases/get_news_usecase.dart';
-import '../../domain/usecases/get_sources_usecase.dart';
-import '../../domain/usecases/is_article_saved_usecase.dart';
-import '../../domain/usecases/save_article_usecase.dart';
-import 'news_details_screen.dart';
+import '../../../../locator.dart';
+import '../../../data/data_source/local/local_data_provider_news.dart';
+import '../../../data/repositories/local_storage_repositoryimpl.dart';
+import '../../../domain/usecases/get_news_usecase.dart';
+import '../../../domain/usecases/get_sources_usecase.dart';
+import '../../../domain/usecases/is_article_saved_usecase.dart';
+import '../../../domain/usecases/save_article_usecase.dart';
+import '../details/news_details_screen.dart';
 
 class SearchScreen extends StatefulWidget {
 

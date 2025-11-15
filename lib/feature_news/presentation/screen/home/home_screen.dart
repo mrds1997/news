@@ -43,11 +43,12 @@ import 'package:news/feature_news/presentation/bloc/get_top_headline_news_by_cat
 import 'package:news/feature_news/presentation/bloc/get_top_headline_news_by_source_status.dart';
 import 'package:news/feature_news/presentation/bloc/news_bloc.dart';
 import 'package:news/feature_news/presentation/bloc/save_newsmeta_status.dart';
-import 'package:news/feature_news/presentation/screen/news_details_screen.dart';
-import 'package:news/feature_news/presentation/screen/search_screen.dart';
+import 'package:news/feature_news/presentation/screen/details/news_details_screen.dart';
+import 'package:news/feature_news/presentation/screen/interest/interest_screen.dart';
+import 'package:news/feature_news/presentation/screen/search/search_screen.dart';
 import 'package:news/locator.dart';
 
-import '../../domain/usecases/get_news_usecase.dart';
+import '../../../domain/usecases/get_news_usecase.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -161,6 +162,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               hintText: 'search your sources...',
                               controller: _searchSourceController,
                               textInputType: TextInputType.text,
+                              prefixIconPath: "assets/images/ic_search.svg",
                               onChangedValue: (query){
                                 setState((){
                                   filteredSources = sources
@@ -290,16 +292,30 @@ class _HomeScreenState extends State<HomeScreen> {
           SliverOverlapAbsorber(
             handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
             sliver: SliverAppBar(
-                expandedHeight: 0.4 * MediaQuery.of(context).size.height,
+                expandedHeight: 0.5 * MediaQuery.of(context).size.height,
                 floating: true,
                 pinned: false,
                 backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                 forceElevated: innerBoxIsScrolled,
                 flexibleSpace: FlexibleSpaceBar(
-                  background: Column(children: [
-                    SizedBox(height: 20.h),
+                  background: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(height: 20.h),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16.w),
+                      child: InkWell(
+                          onTap: (){
+                            Navigator.of(context, rootNavigator: true)
+                                .push(MaterialPageRoute(
+                                builder: (context) => InterestScreen()));
+                          },
+                          child: SvgPicture.asset("assets/images/ic_notification.svg", width: 24.w, height: 24.h,)),
+                    ),
+                    SizedBox(height: 8.h),
                     CustomTextField(
                       hintText: 'search your latest news...',
+                      prefixIconPath: "assets/images/ic_search.svg",
                       controller: _searchController,
                       textInputType: TextInputType.none,
                       onClicked: () {

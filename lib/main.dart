@@ -7,7 +7,7 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_web_frame/flutter_web_frame.dart';
 import 'package:news/feature_news/presentation/bloc/news_bloc.dart';
-import 'package:news/feature_news/presentation/screen/home_screen.dart';
+import 'package:news/feature_news/presentation/screen/home/home_screen.dart';
 
 import 'core/utils/my_custom_scroll_behavior.dart';
 import 'locator.dart';
